@@ -1,42 +1,29 @@
-from cooldown import CoolDown, TooSoon
-from pynput import keyboard
-from phue import Bridge
+import configparser
 import time
 
+from cooldown import TooSoon
+from actions import *
 
-@CoolDown(0.5)
-def toggle_lights():
-    print('Toggling lights on/off')
-    for l in lights:
-        if l.on:
-            l.on = False
-        else:
-            l.on = True
+from pynput import keyboard
+from phue import Bridge, Scene
 
+# Reading from config file
+cfg = configparser.ConfigParser()
+try:
+    cfg.read('config.ini')
 
-@CoolDown(0.25)
-def lower_brightness():
-    print('Lowering brightness')
-    for l in lights:
-        if l.brightness >= 10:
-            l.brightness -= 10
+    bridge_ip = cfg['bridge']['IP']
 
+    first_run = cfg.getboolean('init', 'Running_on_new_device')
 
-@CoolDown(0.25)
-def raise_brightness():
-    print('Raising brightness')
-    for l in lights:
-        if l.brightness <= 245:
-            l.brightness += 10
-
-
-@CoolDown(0.5)
-def activate_scene(group, scene):
-    print('Setting scene ' + scene)
-    if b.run_scene(group_name=group, scene_name=scene):
-        print('Scene set')
-    else:
-        print('Setting scene failed')
+    scene_1 = cfg['scene_1']
+    scene_2 = cfg['scene_2']
+    scene_3 = cfg['scene_3']
+    scene_4 = cfg['scene_4']
+    scene_5 = cfg['scene_5']
+    scene_6 = cfg['scene_6']
+except Exception as e:
+    print(e)
 
 
 def press_callback(key):
@@ -46,66 +33,68 @@ def press_callback(key):
 
     if key == keyboard.Key.f21:
         try:
-            toggle_lights()
+            toggle_lights(lights)
         except TooSoon as e:
             print(e)
 
     if key == keyboard.Key.f23:
         try:
-            lower_brightness()
+            lower_brightness(lights)
         except TooSoon as e:
             print(e)
 
     if key == keyboard.Key.f22:
         try:
-            raise_brightness()
+            raise_brightness(lights)
         except TooSoon as e:
             print(e)
 
     if key == keyboard.Key.f15:
         try:
-            activate_scene('[group name]', '[scene name]')
+            activate_scene(b, scene_1['Group'], scene_1['Scene'])
         except TooSoon as e:
             print(e)
 
     if key == keyboard.Key.f16:
         try:
-            activate_scene('[group name]', '[scene name]')
+            activate_scene(b, scene_2['Group'], scene_2['Scene'])
         except TooSoon as e:
             print(e)
 
     if key == keyboard.Key.f17:
         try:
-            activate_scene('[group name]', '[scene name]')
+            activate_scene(b, scene_3['Group'], scene_3['Scene'])
         except TooSoon as e:
             print(e)
 
     if key == keyboard.Key.f18:
         try:
-            activate_scene('[group name]', '[scene name]')
+            activate_scene(b, scene_4['Group'], scene_4['Scene'])
         except TooSoon as e:
             print(e)
 
     if key == keyboard.Key.f19:
         try:
-            print('Setting scene 5')
+            activate_scene(b, scene_5['Group'], scene_5['Scene'])
         except TooSoon as e:
             print(e)
 
     if key == keyboard.Key.f20:
         try:
-            print('Setting scene 6')
+            activate_scene(b, scene_6['Group'], scene_6['Scene'])
         except TooSoon as e:
             print(e)
 
 
-print('Please press the button on the bridge within 10 seconds')
-time.sleep(10)
+if first_run:
+    print('Please press the button on the bridge within 10 seconds')
+    time.sleep(10)
 
 print('Trying connection')
 try:
-    b = Bridge('[your bridge ip here]')
-    b.connect()
+    b = Bridge(bridge_ip)
+    if first_run:
+        b.connect()
 except:
     print('Connection failed')
 else:
