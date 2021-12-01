@@ -51,37 +51,37 @@ def press_callback(key):
 
     if key == keyboard.Key.f15:
         try:
-            activate_scene(b, scene_1['Group'], scene_1['Scene'])
+            activate_scene(b, scene_1.get('Group', ''), scene_1.get('Scene', ''))
         except TooSoon as e:
             print(e)
 
     if key == keyboard.Key.f16:
         try:
-            activate_scene(b, scene_2['Group'], scene_2['Scene'])
+            activate_scene(b, scene_2.get('Group', ''), scene_2.get('Scene', ''))
         except TooSoon as e:
             print(e)
 
     if key == keyboard.Key.f17:
         try:
-            activate_scene(b, scene_3['Group'], scene_3['Scene'])
+            activate_scene(b, scene_3.get('Group', ''), scene_3.get('Scene', ''))
         except TooSoon as e:
             print(e)
 
     if key == keyboard.Key.f18:
         try:
-            activate_scene(b, scene_4['Group'], scene_4['Scene'])
+            activate_scene(b, scene_4.get('Group', ''), scene_4.get('Scene', ''))
         except TooSoon as e:
             print(e)
 
     if key == keyboard.Key.f19:
         try:
-            activate_scene(b, scene_5['Group'], scene_5['Scene'])
+            activate_scene(b, scene_5.get('Group', ''), scene_5.get('Scene', ''))
         except TooSoon as e:
             print(e)
 
     if key == keyboard.Key.f20:
         try:
-            activate_scene(b, scene_6['Group'], scene_6['Scene'])
+            activate_scene(b, scene_6.get('Group', ''), scene_6.get('Scene', ''))
         except TooSoon as e:
             print(e)
 
