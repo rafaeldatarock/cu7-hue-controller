@@ -1,9 +1,34 @@
 from pynput import keyboard
 from phue import Bridge
+import time
 
-b = Bridge('')
-lights = b.lights
-api = b.get_api()
+from cooldown import CoolDown, TooSoon
+
+@CoolDown(0.5)
+def toggle_lights():
+    print('Toggling lights on/off')
+    for l in lights:
+        if l.on:
+            l.on = False
+        else:
+            l.on = True
+
+
+@CoolDown(0.25)
+def lower_brightness():
+    print('Lowering brightness')
+    for l in lights:
+        if l.brightness >= 10:
+            l.brightness -= 10
+
+
+@CoolDown(0.25)
+def raise_brightness():
+    print('Raising brightness')
+    for l in lights:
+        if l.brightness <= 245:
+            l.brightness += 10
+
 
 def press_callback(key):
     if key == keyboard.Key.esc:
@@ -11,22 +36,22 @@ def press_callback(key):
         return False
 
     if key == keyboard.Key.f21:
-        print('Toggling lights on/off')
-        if b.get_light(['Hanglamp','Strip','Spotje'], 'on'):
-            b.set_light(['Hanglamp','Strip','Spotje'], 'on', False)
-        
-        if not b.get_light(['Hanglamp','Strip','Spotje'], 'on'):
-            b.set_light(['Hanglamp','Strip','Spotje'], 'on', True)
+        try:
+            toggle_lights()
+        except TooSoon as e:
+            print(e)
 
     if key == keyboard.Key.f23:
-        print('Lowering brightness')
-        for l in lights:
-            l.brightness -= 1
+        try:
+            lower_brightness()
+        except TooSoon as e:
+            print(e)
 
     if key == keyboard.Key.f22:
-        print('Raising brightness')
-        for l in lights:
-            l.brightness += 1
+        try:
+            raise_brightness()
+        except TooSoon as e:
+            print(e)
 
     if key == keyboard.Key.f15:
         print('Setting scene 1')
@@ -45,6 +70,23 @@ def press_callback(key):
 
     if key == keyboard.Key.f20:
         print('Setting scene 6')
+
+
+print('Please press the button on the bridge within 10 seconds')
+time.sleep(10)
+
+print('Trying connection')
+try:
+    b = Bridge('[your bridge ip here]')
+    b.connect()
+except:
+    print('Connection failed')
+else:
+    print('Bridge connected')
+
+lights = b.lights
+# api = b.get_api()
+
 
 l = keyboard.Listener(on_press=press_callback)
 l.start()
