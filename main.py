@@ -22,7 +22,7 @@ try:
     scene_4 = cfg['scene_4']
     scene_5 = cfg['scene_5']
     scene_6 = cfg['scene_6']
-except Exception as e:
+except KeyError as e:
     print(e)
 
 
