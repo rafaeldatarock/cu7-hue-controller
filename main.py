@@ -1,8 +1,8 @@
+from cooldown import CoolDown, TooSoon
 from pynput import keyboard
 from phue import Bridge
 import time
 
-from cooldown import CoolDown, TooSoon
 
 @CoolDown(0.5)
 def toggle_lights():
@@ -30,6 +30,15 @@ def raise_brightness():
             l.brightness += 10
 
 
+@CoolDown(0.5)
+def activate_scene(group, scene):
+    print('Setting scene ' + scene)
+    if b.run_scene(group_name=group, scene_name=scene):
+        print('Scene set')
+    else:
+        print('Setting scene failed')
+
+
 def press_callback(key):
     if key == keyboard.Key.esc:
         # returning false in the callback stops the process
@@ -54,22 +63,40 @@ def press_callback(key):
             print(e)
 
     if key == keyboard.Key.f15:
-        print('Setting scene 1')
-    
+        try:
+            activate_scene('[group name]', '[scene name]')
+        except TooSoon as e:
+            print(e)
+
     if key == keyboard.Key.f16:
-        print('Setting scene 2')
+        try:
+            activate_scene('[group name]', '[scene name]')
+        except TooSoon as e:
+            print(e)
 
     if key == keyboard.Key.f17:
-        print('Setting scene 3')
+        try:
+            activate_scene('[group name]', '[scene name]')
+        except TooSoon as e:
+            print(e)
 
     if key == keyboard.Key.f18:
-        print('Setting scene 4')
+        try:
+            activate_scene('[group name]', '[scene name]')
+        except TooSoon as e:
+            print(e)
 
     if key == keyboard.Key.f19:
-        print('Setting scene 5')
+        try:
+            print('Setting scene 5')
+        except TooSoon as e:
+            print(e)
 
     if key == keyboard.Key.f20:
-        print('Setting scene 6')
+        try:
+            print('Setting scene 6')
+        except TooSoon as e:
+            print(e)
 
 
 print('Please press the button on the bridge within 10 seconds')
@@ -85,8 +112,6 @@ else:
     print('Bridge connected')
 
 lights = b.lights
-# api = b.get_api()
-
 
 l = keyboard.Listener(on_press=press_callback)
 l.start()
