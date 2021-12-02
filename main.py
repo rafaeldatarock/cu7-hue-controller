@@ -9,9 +9,8 @@ from phue import Bridge, Scene
 
 # Reading from config file
 cfg = configparser.ConfigParser()
+cfg.read('config.ini')
 try:
-    cfg.read('config.ini')
-
     bridge_ip = cfg['bridge']['IP']
 
     first_run = cfg.getboolean('init', 'Running_on_new_device')
@@ -26,82 +25,59 @@ except KeyError as e:
     print(e)
 
 
+# Defining what to do when a key is pressed
 def press_callback(key):
     if key == keyboard.Key.esc:
         # returning false in the callback stops the process
         return False
 
-    if key == keyboard.Key.f21:
-        try:
-            toggle_lights(lights)
-        except TooSoon as e:
-            print(e)
-
-    if key == keyboard.Key.f23:
-        try:
-            lower_brightness(lights)
-        except TooSoon as e:
-            print(e)
-
-    if key == keyboard.Key.f22:
-        try:
-            raise_brightness(lights)
-        except TooSoon as e:
-            print(e)
-
-    if key == keyboard.Key.f15:
-        try:
-            activate_scene(b, scene_1.get('Group', ''), scene_1.get('Scene', ''))
-        except TooSoon as e:
-            print(e)
-
-    if key == keyboard.Key.f16:
-        try:
-            activate_scene(b, scene_2.get('Group', ''), scene_2.get('Scene', ''))
-        except TooSoon as e:
-            print(e)
-
-    if key == keyboard.Key.f17:
-        try:
-            activate_scene(b, scene_3.get('Group', ''), scene_3.get('Scene', ''))
-        except TooSoon as e:
-            print(e)
-
-    if key == keyboard.Key.f18:
-        try:
-            activate_scene(b, scene_4.get('Group', ''), scene_4.get('Scene', ''))
-        except TooSoon as e:
-            print(e)
-
-    if key == keyboard.Key.f19:
-        try:
-            activate_scene(b, scene_5.get('Group', ''), scene_5.get('Scene', ''))
-        except TooSoon as e:
-            print(e)
-
-    if key == keyboard.Key.f20:
-        try:
-            activate_scene(b, scene_6.get('Group', ''), scene_6.get('Scene', ''))
-        except TooSoon as e:
-            print(e)
+    try:
+        # Checking if pressed key is present in
+        trigger = triggers.get(key, False)
+        if trigger:
+            function = trigger['f']
+            params = trigger['p']
+            function(*params)
+    except TooSoon as e:
+        print(e)
 
 
+# Give some time to press the button on the bridge
 if first_run:
     print('Please press the button on the bridge within 10 seconds')
-    time.sleep(10)
+    time.sleep(15)
 
-print('Trying connection')
+# Making connection with bridge
+print('Trying to connect to bridge')
 try:
     b = Bridge(bridge_ip)
     if first_run:
+        # If first run on device, call Bridge.connect() to register application and device on the bridge
         b.connect()
 except:
     print('Connection failed')
 else:
     print('Bridge connected')
 
+
+# Selects all lights connected to the bridge, so they can be looped over
+# I will replace this with selecting specific lights which will be able set in config.ini
 lights = b.lights
 
+# Defining the trigger functions and their parameters
+triggers = {
+    keyboard.Key.f21: { 'f': toggle_lights, 'p': [lights] },
+    keyboard.Key.f23: { 'f': lower_brightness, 'p': [lights] },
+    keyboard.Key.f22: { 'f': raise_brightness, 'p': [lights] },
+    keyboard.Key.f15: { 'f': activate_scene, 'p': [b, scene_1.get('Group', ''), scene_1.get('Scene', '')] },
+    keyboard.Key.f16: { 'f': activate_scene, 'p': [b, scene_2.get('Group', ''), scene_2.get('Scene', '')] },
+    keyboard.Key.f17: { 'f': activate_scene, 'p': [b, scene_3.get('Group', ''), scene_3.get('Scene', '')] },
+    keyboard.Key.f18: { 'f': activate_scene, 'p': [b, scene_4.get('Group', ''), scene_4.get('Scene', '')] },
+    keyboard.Key.f19: { 'f': activate_scene, 'p': [b, scene_5.get('Group', ''), scene_5.get('Scene', '')] },
+    keyboard.Key.f20: { 'f': activate_scene, 'p': [b, scene_6.get('Group', ''), scene_6.get('Scene', '')] },
+}
+
+# Creating and starting the keyboard listener
 l = keyboard.Listener(on_press=press_callback)
 l.start()
 l.join()
